@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Game</title>
+<link rel="stylesheet" href="style v2.css">
+
+<style>
+
+</style>
+
+</head>
+
+<body>
+
+<div id="div-main" class="layout-column-centered">
+    <div class="layout-row">
+        <span id="span-name">Name</span>
+        <span id="span-hp">5/5 HP</span>
+    </div>
+
+    <div class="layout-row">
+        <span id="span-season">Spring</span>
+        <span id="span-time">Morning</span>
+    </div>
+
+    <div class="layout-column-centered">
+        <span id="span-complex"></span>
+        <span id="span-room"></span>
+    </div>
+
+    <div id="div-menu-buttons" class="layout-row">
+        <button onclick="game.show_div_flex('div-character-menu-buttons')">Character</button>
+        <button>Inventory</button>
+        <button>Journal</button>
+        <button>Menu</button>
+    </div>
+
+    <div id="div-room-info" class="layout-column-centered">
+        <div class="layout-row">
+            <div id="div-rooms" class="div-room-info-cell"></div>
+            <div id="div-objects" class="div-room-info-cell"></div>
+        </div>
+
+        <div class="layout-row">
+            <div id="div-npcs" class="div-room-info-cell"></div>
+            <div id="div-enemies" class="div-room-info-cell"></div>
+        </div>
+    </div>
+
+    <div id="div-event-log"></div>
+
+    <div id="div-action-buttons" class="layout-row">
+        <button>Explore</button>
+        <button onclick="game.show_div_flex('div-move-menu1'); game.build_move_menu()">Move</button>
+        <button>Talk</button>
+        <button>Use</button>
+        <button>Attack</button>
+    </div>
+
+    <span id="span-counter">0</span>
+    <span id="span-version">v2</span>
+
+</div>
+
+<div id="div-character-menu-buttons" class="layout-column-centered">
+    <button class="button-character-menu" onclick="game.show_div_flex('div-character-info')">Info</button>
+    <button class="button-character-menu">Equipment</button>
+    <button class="button-character-menu">Journal</button>
+    <button class="button-character-menu">Skills</button>
+    <button class="button-character-menu">Spells</button>
+    <button class="button-close" onclick="game.hide_div('div-character-menu-buttons')">Close</button>
+</div>
+
+<div id="div-character-info" class="layout-column-centered">
+    <span class="span1-character-info">Name</span>
+    <span class="span2-character-info">User</span>
+
+    <span class="span1-character-info">Race</span>
+    <span class="span2-character-info">Human</span>
+
+    <span class="span1-character-info">Level</span>
+    <span class="span2-character-info">1</span>
+
+    <span class="span1-character-info">Experience</span>
+    <span class="span2-character-info">0</span>
+
+    <span class="span1-character-info">Health</span>
+    <span class="span2-character-info">10</span>
+
+    <span class="span1-character-info">Mana</span>
+    <span class="span2-character-info">0</span>
+
+    <button onclick="game.hide_div('div-character-info')">Close</button>
+</div>
+
+<div id="div-move-menu1" class="layout-column-centered">
+    <div id="div-move-menu2"></div>
+    <button class="button-close" onclick="game.hide_div('div-move-menu1'); game.clear_move_menu()">Close</button>
+</div>
+
+<script src="script v2.js">
+ 
+</script>
+
+</body>
+
+</html>
