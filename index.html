@@ -573,14 +573,14 @@ const game = {
                 document.exitFullscreen?.() || // Standard API
                 document.mozCancelFullScreen?.() || // Firefox
                 document.webkitExitFullscreen?.() || // Chrome, Safari, and Opera
-                document.msExitFullscreen?.() || // Internet Explorer and Edge
+                document.msExitFullscreen?.() // Internet Explorer and Edge
                 
             } else {
 
                 document.requestFullscreen?.() || // Standard API
                 document.mozRequestFullScreen?.() || // Firefox
                 document.webkitRequestFullscreen?.() || // Chrome, Safari, and Opera
-                document.msRequestFullscreen?.() || // Internet Explorer and Edge
+                document.msRequestFullscreen?.() // Internet Explorer and Edge
             }
         },
 
