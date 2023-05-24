@@ -1,0 +1,620 @@
+<!--v3-->
+<!--COMPONENTS PROGRESSION-->
+
+<!--
+    Prototyped:
+        -Calendar/season/time counter
+        -Main game UI layout
+        -Encapsulate code into game object
+
+    Implemented:
+        v2:
+        -HTML tag for room's complex
+        -Move function to update room's complex
+        -Function to build creatures list
+        -Full screen support for multiple browsers
+
+    Fixes:
+        v2:
+        -Scoping of setInterval(update_time)
+        -Adjusted some CSS properties for screen fitting
+
+    In progress:
+        -Actions(move, attack, explore, etc)
+        -Menus(character, inventory, journal)
+        -Event messages formatting
+
+    In queue:
+        -Combat system
+        -Talk/Dialogue
+        -Merchant selling/buying
+        -Weather
+        -Random encounters
+-->
+
+<!--INDEX SEARCH-->
+ 
+<!--
+    All html/css/js is in this one file,
+    To find code categories, search with this format:
+ 
+    #css
+    #html
+    #js
+
+    To find objects, classes, properties, methods, or data, place // before your search.
+
+-->
+
+<!DOCTYPE html>
+
+<html>
+ 
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Game</title>
+
+<!--
+    #css
+-->
+
+<style>
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    margin: 0px;
+    height: 100vh;
+}
+
+#div-main {
+    padding: 5px;
+}
+
+#div-menu-buttons { 
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#div-room-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 1px;
+}
+
+#div-event-log {
+    overflow: auto;
+    border: 1px solid black;
+    padding: 5px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    height: 240px;
+    width: 300px;
+}
+
+#div-character-menu-buttons {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+    padding: 10px;
+    background-color: white;
+}
+
+#div-character-info {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+    background-color: white;
+    padding: 10px;
+}
+
+#div-move-menu1 {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+    padding: 10px;
+    background-color: white;
+}
+
+#div-move-menu2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+}
+
+#div-settings-menu1 {
+    display: none;
+    position: absolute;
+    border: 1px solid black;
+    padding: 10px;
+    background-color: white;
+}
+
+#div-settings-menu2 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+}
+
+#span-name {
+    margin-right: 5px;
+}
+
+#span-season {
+    margin-right: 5px;
+}
+
+.div-room-info-cell {
+    display: flex;
+    flex-direction: column;
+    height: 80px;
+    width: 150px;
+	overflow: auto;
+	border: 1px solid black;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+.layout-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.layout-column-centered {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.layout-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.layout-row-centered {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-items: center;
+}
+
+.span1-character-info {
+    text-decoration: underline;
+}
+
+.span2-character-info {
+    margin-bottom: 5px;
+}
+
+.button-character-menu {
+    margin-bottom: 5px;
+}
+
+.button-move-menu {
+    margin-bottom: 5px;
+}
+
+.locked {
+    pointer-events: none;
+}
+
+.button-close { 
+    margin-top: 10px;
+}
+
+button {
+    margin-left: 2px;
+    margin-right: 2px;
+    font-size: 16px;
+}
+
+</style>
+
+</head>
+
+<!--
+    #html
+-->
+
+<body>
+
+<div id="div-main" class="layout-column-centered">
+    <div class="layout-column-centered">
+        <div class="layout-row">
+            <span id="span-name">Name</span>
+            <span id="span-hp">5/5 HP</span>
+        </div>
+    
+        <div class="layout-row">
+            <span id="span-season">Spring</span>
+            <span id="span-time">Morning</span>
+        </div>
+    
+        <div class="layout-column-centered">
+            <span id="span-complex"></span>
+            <span id="span-room"></span>
+        </div>
+    </div>
+
+    <div id="div-menu-buttons" class="layout-row">
+        <button onclick="game.show_div_flex('div-character-menu-buttons')">Character</button>
+        <button>Inventory</button>
+        <button>Journal</button>
+        <button onclick="game.show_div_flex('div-settings-menu1')">Settings</button>
+    </div>
+
+    <div id="div-room-info">
+        <div id="div-rooms" class="div-room-info-cell"></div>
+        <div id="div-objects" class="div-room-info-cell"></div>
+        <div id="div-npcs" class="div-room-info-cell"></div>
+        <div id="div-enemies" class="div-room-info-cell"></div>
+    </div>
+
+    <div id="div-event-log"></div>
+
+    <div id="div-action-buttons" class="layout-row">
+        <button>Explore</button>
+        <button onclick="game.show_div_flex('div-move-menu1'); game.build_move_menu()">Move</button>
+        <button>Talk</button>
+        <button>Use</button>
+        <button>Attack</button>
+    </div>
+
+    <span id="span-counter">0</span>
+
+</div>
+
+<div id="div-character-menu-buttons" class="layout-column-centered">
+    <button class="button-character-menu" onclick="game.show_div_flex('div-character-info')">Info</button>
+    <button class="button-character-menu">Equipment</button>
+    <button class="button-character-menu">Journal</button>
+    <button class="button-character-menu">Skills</button>
+    <button class="button-character-menu">Spells</button>
+    <button class="button-close" onclick="game.hide_div('div-character-menu-buttons')">Close</button>
+</div>
+
+<div id="div-character-info" class="layout-column-centered">
+    <span class="span1-character-info">Name</span>
+    <span class="span2-character-info">User</span>
+
+    <span class="span1-character-info">Race</span>
+    <span class="span2-character-info">Human</span>
+
+    <span class="span1-character-info">Level</span>
+    <span class="span2-character-info">1</span>
+
+    <span class="span1-character-info">Experience</span>
+    <span class="span2-character-info">0</span>
+
+    <span class="span1-character-info">Health</span>
+    <span class="span2-character-info">10</span>
+
+    <span class="span1-character-info">Mana</span>
+    <span class="span2-character-info">0</span>
+
+    <button onclick="game.hide_div('div-character-info')">Close</button>
+</div>
+
+<div id="div-move-menu1" class="layout-column-centered">
+    <div id="div-move-menu2"></div>
+    <button class="button-close" onclick="game.hide_div('div-move-menu1'); game.clear_move_menu2()">Close</button>
+</div>
+
+<div id="div-settings-menu1" class="layout-column-centered">
+    <div id="div-settings-menu2">
+        <button onclick="game.toggle_full_screen()">Toggle full-screen</button>
+    </div>
+    <button class="button-close" onclick="game.hide_div('div-settings-menu1')">Close</button>
+</div>
+
+<!--
+    #js
+-->
+
+<script>
+
+const game = {
+    //Update time properties
+    span_counter: document.getElementById("span-counter"),
+    span_time: document.getElementById("span-time"),
+    span_season: document.getElementById("span-season"),
+    list_times: ["Morning", "Mid-day", "Night"],
+    list_seasons: ["Spring", "Summer", "Fall", "Winter"],
+    counter: 0,
+    counter_time: 0,
+    counter_season: 0,
+    index_time: 0,
+    index_season: 0,
+
+    //Event log/room info properties
+    div_event_log: document.getElementById("div-event-log"),
+    div_objects: document.getElementById("div-objects"),
+    div_npcs: document.getElementById("div-npcs"),
+    div_enemies: document.getElementById("div-enemies"),
+    div_rooms: document.getElementById("div-rooms"),
+    span_complex: document.getElementById("span-complex"),
+    span_room: document.getElementById("span-room"),
+    div_move_menu1: document.getElementById("div-move-menu1"),
+    div_move_menu2: document.getElementById("div-move-menu2"),
+
+    //Toggle div display properties
+    list_queue_previous_div: [document.getElementById("div-main")],
+
+    //Player
+    player: {
+        name: "player",
+        race: "human",
+        level: 1,
+        experience: 0,
+        health: 10,
+        mana: 0,
+        room: 'room_adventurers_hold_sanctum'
+    },
+
+    //data rooms
+    keys_rooms: {
+
+        room_adventurers_hold: {
+            name: "Adventurer's Hold",
+            description: `There are a few statues here and a circular pit 
+                        in the middle layered with stone steps used for sitting.`,
+            forward: "room_adventurers_hold_sanctum"
+        },
+
+        room_adventurers_hold_sanctum: {
+            complex: 'room_adventurers_hold',
+            name: "Sanctum",
+            description: `There are a few statues here and a circular pit 
+                        in the middle layered with stone steps used for sitting.`,
+            npcs: ['creature_adventurers_hold_monk'],
+            enemies: [],
+            objects: [],
+            connections: ['room_adventurers_hold_library', 'room_adventurers_hold_lounge']
+        },
+    
+        room_adventurers_hold_library: {
+            complex: 'room_adventurers_hold',
+            name: "Library",
+            description: `The shelves are made of stone rather than wood.
+                        There are a few single books placed on podiums.`,
+            npcs: ['creature_adventurers_hold_librarian'],
+            enemies: [],
+            objects: [],
+            connections: ['room_adventurers_hold_sanctum', 'room_adventurers_hold_lounge']
+        },
+
+        room_adventurers_hold_lounge: {
+            complex: 'room_adventurers_hold',
+            name: "Lounge",
+            description: "There are some tables and chairs here. A bar is to the side.",
+            npcs: ['creature_adventurers_hold_bartender'],
+            enemies: [],
+            objects: [],
+            connections: ['room_adventurers_hold_sanctum', 'room_adventurers_hold_library']
+        }
+    },
+
+    keys_creatures: {
+
+        //people
+        creature_adventurers_hold_librarian: {
+            room: 'room_adventurers_hold_library',
+            name: "Librarian",
+            is_wild: false,
+            is_hostile: false
+        },
+
+        creature_adventurers_hold_bartender: {
+            room: 'room_adventurers_hold_lounge',
+            name: "Bartender",
+            is_wild: false,
+            is_hostile: false
+        },
+
+        creature_adventurers_hold_monk: {
+            room: 'room_adventurers_hold_sanctum',
+            name: "Monk",
+            is_wild: false,
+            is_hostile: false
+        }
+    },
+
+    //Show/hide divs
+    hide_div: function (div) {
+        document.getElementById(div).style.display = 'none'
+
+        if (this.list_queue_previous_div.length === 2) {
+            this.list_queue_previous_div[0].classList.remove('locked')
+            this.list_queue_previous_div[1].classList.remove('locked')
+            this.list_queue_previous_div.pop()
+        } else {
+            this.list_queue_previous_div[this.list_queue_previous_div.length - 2].classList.remove('locked')
+            this.list_queue_previous_div.pop() 
+        }
+    },
+
+    show_div_flex: function (div) {
+        document.getElementById(div).style.display = 'flex' 
+        this.list_queue_previous_div[this.list_queue_previous_div.length - 1].classList.add('locked')
+        this.list_queue_previous_div.push(document.getElementById(div))
+    },
+
+    show_div_block: function (div) {
+        document.getElementById(div).style.display = 'block'
+        this.list_queue_previous_div[this.list_queue_previous_div.length - 1].classList.add('locked')
+        this.list_queue_previous_div.push(document.getElementById(div))
+    },
+
+    //Counter and time/season cycle
+    update_time: function () {
+        this.counter++
+        this.counter_time++
+        this.counter_season++
+        this.span_counter.innerHTML = this.counter
+        
+
+        if (this.counter_time === 300) {
+            this.counter_time = 0;
+
+            if (this.index_time !== 2) {
+                this.index_time++;
+            } else {
+                this.index_time = 0;
+            }
+
+            this.span_time.innerHTML = this.list_times[this.index_time];
+        }
+
+        if (this.counter_season === 3600) {
+            this.counter_season = 0;
+
+            if (this.index_season !== 3) {
+                this.index_season++;
+            } else {
+                this.index_season = 0;
+            }
+
+            this.span_season.innerHTML = this.list_seasons[this.index_season];
+        }
+    },
+
+    //Build event log 
+    build_event_log_room_info: function () {
+        this.div_event_log.innerHTML += "Welcome to my game.<br><br>";
+        this.div_event_log.innerHTML += "I am proud to present this to you.<br><br>";
+        this.div_event_log.innerHTML += "May you have many adventures and enjoy this mobile game!<br><br>";
+    },
+
+    //Build rooms list
+    build_list_rooms: function () {
+        const list_connections = this.keys_rooms[this.player.room].connections;
+        for (let i = 0; i < list_connections.length; i++) {
+            const span = document.createElement('span');
+            span.innerHTML = this.keys_rooms[list_connections[i]].name;
+            this.div_rooms.appendChild(span);
+        }
+    },
+
+    //Build creatures list
+    build_list_creatures: function () {
+
+        for (npc of this.keys_rooms[this.player.room].npcs) {
+            let span = document.createElement('span');
+            span.innerHTML = this.keys_creatures[npc].name;
+            this.div_npcs.appendChild(span);
+        }
+
+        for (enemy of this.keys_rooms[this.player.room].enemies) {
+            let span = document.createElement('span');
+            span.innerHTML = this.keys_creatures[enemy].name;
+            this.div_enemies.appendChild(span);
+        }
+    },
+
+    //Build move menu & move action
+    build_move_menu: function () {
+        let list_connections = this.keys_rooms[this.player.room].connections;
+        for (let i = 0; i < list_connections.length; i++) {
+            const button = document.createElement("button");
+
+            button.onclick = (event) => {
+                if (this.keys_rooms[event.target.getAttribute("data-info")].complex) {
+                    this.span_complex.innerHTML = this.keys_rooms[this.keys_rooms[event.target.getAttribute("data-info")].complex].name
+                }
+
+                this.span_room.innerHTML = this.keys_rooms[event.target.getAttribute("data-info")].name;
+                this.player.room = event.target.getAttribute("data-info");
+
+                this.div_move_menu1.style.display = "none";
+
+                if (this.list_queue_previous_div.length >= 2) {
+                    const previousDiv1 = this.list_queue_previous_div.pop();
+                    const previousDiv2 = this.list_queue_previous_div.pop();
+                    previousDiv1.classList.remove("locked");
+                    previousDiv2.classList.remove("locked");
+                    this.list_queue_previous_div.push(previousDiv2);
+                } else if (this.list_queue_previous_div.length === 1) {
+                    const previousDiv = this.list_queue_previous_div.pop();
+                    previousDiv.classList.remove("locked");
+                }
+
+                this.clear_move_menu2();
+                this.clear_list_creatures();
+                this.clear_list_rooms();
+                this.build_list_rooms();
+                this.build_list_creatures();
+                this.div_event_log.innerHTML +=
+                    "You moved to " + this.keys_rooms[event.target.getAttribute("data-info")].name + "<br>";
+                this.div_event_log.scrollTop = this.div_event_log.scrollHeight;
+            };
+
+            button.classList.add("button-move-menu");
+            button.setAttribute("data-info", list_connections[i]);
+            button.innerHTML = this.keys_rooms[list_connections[i]].name;
+            this.div_move_menu2.appendChild(button);
+        }
+    },
+
+    toggle_full_screen: function() {
+
+        if (document.fullscreenElement ||
+            document.mozFullScreenElement ||
+            document.webkitFullscreenElement ||
+            document.msFullscreenElement) {
+
+                document.exitFullscreen?.() || // Standard API
+                document.mozCancelFullScreen?.() || // Firefox
+                document.webkitExitFullscreen?.() || // Chrome, Safari, and Opera
+                document.msExitFullscreen?.() || // Internet Explorer and Edge
+                
+            } else {
+
+                document.requestFullscreen?.() || // Standard API
+                document.mozRequestFullScreen?.() || // Firefox
+                document.webkitRequestFullscreen?.() || // Chrome, Safari, and Opera
+                document.msRequestFullscreen?.() || // Internet Explorer and Edge
+            }
+        },
+
+    clear_move_menu2: function() {
+        this.div_move_menu2.innerHTML = "";
+    },
+
+    clear_list_creatures: function() {
+        this.div_npcs.innerHTML = "";
+        this.div_enemies.innerHTML = "";
+    },
+
+    clear_list_rooms: function() {
+        this.div_rooms.innerHTML = "";
+    }
+};
+
+// Initialize game
+game.span_room.innerHTML = game.keys_rooms[game.player.room].name;
+
+if (game.keys_rooms[game.player.room].complex) {
+    game.span_complex.innerHTML = game.keys_rooms[game.keys_rooms[game.player.room].complex].name
+}
+
+game.build_event_log_room_info();
+game.build_list_rooms();
+game.build_list_creatures();
+
+setInterval(function() {
+    game.update_time();
+}, 1000);
+
+</script>
+
+</body>
+
+</html>
