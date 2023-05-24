@@ -577,10 +577,10 @@ const game = {
                 
             } else {
 
-                document.requestFullscreen?.() || // Standard API
-                document.mozRequestFullScreen?.() || // Firefox
-                document.webkitRequestFullscreen?.() || // Chrome, Safari, and Opera
-                document.msRequestFullscreen?.() // Internet Explorer and Edge
+                document.documentElement.requestFullscreen?.() || // Standard API
+                document.documentElement.mozRequestFullScreen?.() || // Firefox
+                document.documentElement.webkitRequestFullscreen?.() || // Chrome, Safari, and Opera
+                document.documentElement.msRequestFullscreen?.() // Internet Explorer and Edge
             }
         },
 
