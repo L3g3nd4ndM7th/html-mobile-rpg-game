@@ -14,10 +14,18 @@
         -Function to build creatures list
         -Full screen support for multiple browsers
 
+        v3:
+        -Donate button
+        -Start menu with scrolling story
+
     Fixes:
         v2:
         -Scoping of setInterval(update_time)
         -Adjusted some CSS properties for screen fitting
+
+        v3:
+        -Adjusted buttons class to be more dynamic
+
 
     In progress:
         -Actions(move, attack, explore, etc)
@@ -71,6 +79,7 @@ body {
 }
 
 #div-main {
+    display: none;
     padding: 5px;
 }
 
@@ -194,11 +203,7 @@ body {
     margin-bottom: 5px;
 }
 
-.button-character-menu {
-    margin-bottom: 5px;
-}
-
-.button-move-menu {
+.button-menu {
     margin-bottom: 5px;
 }
 
@@ -216,6 +221,43 @@ button {
     font-size: 16px;
 }
 
+#menu-start-buttons {
+      margin-top: 10px;
+}
+
+#div-story-scroll1 {
+    width: 300px;
+    height: 150px;
+    overflow-y: hidden;
+    border: 1px solid #000000;
+}
+
+#div-story-scroll2 {
+    animation: animation-start-story-scroll 40s linear infinite;
+    margin: 10px;
+}
+
+.scrolling-text {
+    display: flex;
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+.button-start-menu {
+    margin-top: 2px;
+    width: 150px;
+    font-size: 16px;
+}
+
+@keyframes animation-start-story-scroll {
+    0% {
+    transform: translateY(30%);
+    }
+    100% {
+    transform: translateY(-100%);
+    }
+}
+
 </style>
 
 </head>
@@ -225,6 +267,24 @@ button {
 -->
 
 <body>
+    
+<div id="div-start" class="layout-column-centered"> 
+    <div id="div-story-scroll1">
+        <div id="div-story-scroll2">
+            <span class="scrolling-text">In a world of magic and mystery, a young adventurer sought ancient treasures.</span>
+            <span class="scrolling-text">Guided by a talking raven, they faced mythical creatures and overcame challenges.</span>
+            <span class="scrolling-text">With the help of a skilled archer, they journeyed through enchanted forests and treacherous landscapes.</span>
+            <span class="scrolling-text">Their quest led them to the lost city of Eldoria, where unimaginable secrets awaited.</span>
+            <span class="scrolling-text">Together, they forged an unbreakable bond and unraveled the mysteries of the ancient world.</span>
+        </div>
+    </div>
+
+    <div id="menu-start-buttons" class="layout-column-centered">
+        <button class="button-start-menu" onclick="game.show_div_flex('div-main'); game.hide_div('div-start')">New Game</button>
+        <button class="button-start-menu">Load Game</button>
+        <button class="button-start-menu">Close</button>
+    </div>
+</div>
 
 <div id="div-main" class="layout-column-centered">
     <div class="layout-column-centered">
@@ -273,11 +333,11 @@ button {
 </div>
 
 <div id="div-character-menu-buttons" class="layout-column-centered">
-    <button class="button-character-menu" onclick="game.show_div_flex('div-character-info')">Info</button>
-    <button class="button-character-menu">Equipment</button>
-    <button class="button-character-menu">Journal</button>
-    <button class="button-character-menu">Skills</button>
-    <button class="button-character-menu">Spells</button>
+    <button class="button-menu" onclick="game.show_div_flex('div-character-info')">Info</button>
+    <button class="button-menu">Equipment</button>
+    <button class="button-menu">Journal</button>
+    <button class="button-menu">Skills</button>
+    <button class="button-menu">Spells</button>
     <button class="button-close" onclick="game.hide_div('div-character-menu-buttons')">Close</button>
 </div>
 
@@ -310,7 +370,8 @@ button {
 
 <div id="div-settings-menu1" class="layout-column-centered">
     <div id="div-settings-menu2">
-        <button onclick="game.toggle_full_screen()">Toggle full-screen</button>
+        <button class="button-menu" onclick="game.toggle_full_screen()">Toggle full-screen</button>
+        <button class="button-menu">Donate</button>
     </div>
     <button class="button-close" onclick="game.hide_div('div-settings-menu1')">Close</button>
 </div>
@@ -366,7 +427,7 @@ const game = {
             name: "Adventurer's Hold",
             description: `There are a few statues here and a circular pit 
                         in the middle layered with stone steps used for sitting.`,
-            forward: "room_adventurers_hold_sanctum"
+            forward: 'room_adventurers_hold_sanctum'
         },
 
         room_adventurers_hold_sanctum: {
@@ -426,7 +487,7 @@ const game = {
             is_hostile: false
         }
     },
-
+ 
     //Show/hide divs
     hide_div: function (div) {
         document.getElementById(div).style.display = 'none'
@@ -556,7 +617,7 @@ const game = {
                 this.div_event_log.scrollTop = this.div_event_log.scrollHeight;
             };
 
-            button.classList.add("button-move-menu");
+            button.classList.add("button-menu");
             button.setAttribute("data-info", list_connections[i]);
             button.innerHTML = this.keys_rooms[list_connections[i]].name;
             this.div_move_menu2.appendChild(button);
